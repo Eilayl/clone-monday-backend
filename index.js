@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
+
+
+const authRoutes = require('./routes/AuthRoutes');
 require('dotenv').config();
+
 
 // 🌐 CORS config (כולל credentials)
 app.use(cors({
@@ -23,14 +27,8 @@ mongoose.connect(process.env.MONGO_URL)
   .catch((error) => console.log(error));
 
 // 🚏 Routes
-app.get("/createbackend", (req, res) => {
-  try{
-    res.status(200).json({ message: "Backend route is working" });
-  }
-  catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
-  }
-});
+app.use('/auth', authRoutes);
+
 
 // 🚀 Server
 const PORT = process.env.PORT || 8000;
