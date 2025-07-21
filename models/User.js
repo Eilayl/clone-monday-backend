@@ -7,23 +7,25 @@ const userSchema = new Schema({
         required: true,
         unique: true,
     },
-    password: {
-        type: String,
-        required: false, // Passwords not required when user sign up with Google
+    fields: {
+        password: {
+            type: String,
+            required: false, // Passwords not required when user sign up with Google
+        },
+        phone:{
+            type: String,
+            required: false,   // Not required when user sign up with Google
+            
+        },
+        name: {
+            type: String,
+            required: false, // Not required when user sign up with Google
+        },
     },
     signupwithgoogle: {
         type: Boolean,
         required: true,
         default: false, // Default to false, true if user signs up with Google
-    },
-    phone:{
-        type: String,
-        required: false,   // Not required when user sign up with Google
-        
-    },
-    fullname: {
-        type: String,
-        required: false, // Not required when user sign up with Google
     },
     userSurvey: [
         {
