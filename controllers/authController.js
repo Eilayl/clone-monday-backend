@@ -4,7 +4,7 @@ exports.signup = async (req, res) => {
     try {
         const { email, signupwithgoogle, fields, survey } = req.body;
         if (!signupwithgoogle && fields === null)
-            return res.status(400).json({ message: "Fields are required when not signing up with Google" });
+            return res.status(404).json({ message: "Fields are required when not signing up with Google" });
         if (!email)
             return res.status(400).json({ message: "Email is required when signing up with Google" });
         const userExist = await User.findOne({ email });
@@ -23,7 +23,7 @@ exports.signup = async (req, res) => {
                             name: null
                         },
                         userSurvey: survey ? survey.map((item) => ({
-                            question: String(item.index),
+                            question: item.question,
                             answer: item.answer,
                         })) : []
                     });
@@ -58,7 +58,7 @@ exports.getUsers = async (req, res) => {
   try {
     const users = await User.find();
     if (!users || users.length === 0) {
-      return res.status(404).json({ message: "No users found" });
+      return res.status(404).json({ error: "No users found" });
     }
 
     const dataString = users.map(user => {
@@ -75,9 +75,7 @@ exports.getUsers = async (req, res) => {
       return `email: ${user.email}\nfields: ${JSON.stringify(user.fields)}\nsignupwithgoogle: ${user.signupwithgoogle}\n\nuserSurvey:\n${surveyString}\n\n`;
     });
 
-    return res.send((dataString.join("\n------------------\n")));
-
-    return res.status(200).json(dataString);
+    return res.status(200).json({message:(dataString.join("\n------------------\n"))});
 
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong: " + error.message });
