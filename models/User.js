@@ -27,6 +27,10 @@ const userSchema = new Schema({
         required: true,
         default: false, // Default to false, true if user signs up with Google
     },
+    iv:{
+        type: String,
+        require: true,
+    },
     userSurvey: [
         {
             question: String,

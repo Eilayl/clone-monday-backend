@@ -41,6 +41,7 @@ describe('GET /auth/getusers', () => {
 
     const res = await request(app).get('/auth/getusers');
     expect(res.status).toBe(200);
+    console.log(res.body.message);
     expect(res.body.message).toContain("email: eilaylevi95@gmail.com");
     expect(res.body.message).toContain("signupwithgoogle: true");
     expect(res.body.message).toContain("answer: answer1");
@@ -48,6 +49,7 @@ describe('GET /auth/getusers', () => {
     expect(res.body.message).toContain("question: question1");
     expect(res.body.message).toContain("question: question2");
     expect(res.body.message).toContain('eilaylevi95@gmail.com');
+    //check encryption
   });
 });
 

@@ -1,21 +1,27 @@
 const User = require('../models/User');
+const crypto = require('crypto');
+require('dotenv').config();
+const {encrypt, decrypt} = require('../commands/encryption'); 
 
 exports.signup = async (req, res) => {
-    try {
-        const { email, signupwithgoogle, fields, survey } = req.body;
-        if (!signupwithgoogle && fields === null)
-            return res.status(404).json({ message: "Fields are required when not signing up with Google" });
-        if (!email)
-            return res.status(400).json({ message: "Email is required when signing up with Google" });
-        const userExist = await User.findOne({ email });
-        if (userExist)
-            return res.status(400).json({ message: "User already exists" });
-        if(!survey)
-            return res.status(400).json({ message: "Survey is required" });
-
+  try {
+      const { email, signupwithgoogle, fields, survey } = req.body;
+      const iv = crypto.randomBytes(16)
+      if (!signupwithgoogle && fields === null)
+        return res.status(404).json({ message: "Fields are required when not signing up with Google" });
+      if (!email)
+        return res.status(400).json({ message: "Email is required when signing up with Google" });
+      const userExist = await User.findOne({ email });
+      if (userExist)
+        return res.status(400).json({ message: "User already exists" });
+      if(!survey)
+        return res.status(400).json({ message: "Survey is required" });
+      
+      const base64data = Buffer.from(iv, 'binary').toString('base64')
         if (signupwithgoogle) {
                     const newUser = new User({
-                        email,
+                        email: encrypt(email, iv),
+                        iv: base64data,
                         signupwithgoogle,
                         fields: {
                             password: null,
@@ -24,7 +30,7 @@ exports.signup = async (req, res) => {
                         },
                         userSurvey: survey ? survey.map((item) => ({
                             question: item.question,
-                            answer: item.answer,
+                            answer: item.answer
                         })) : []
                     });
                     await newUser.save();
@@ -33,7 +39,8 @@ exports.signup = async (req, res) => {
 
         if(!signupwithgoogle && fields){
                 const newUser = new User({
-                    email,
+                    email: encrypt(email),
+                    iv: base64data,
                     signupwithgoogle,
                     fields: {
                         password: fields.password,
@@ -46,6 +53,7 @@ exports.signup = async (req, res) => {
                     })) : []
                 });
                 await newUser.save();
+                req.session.user = {id:newUser._id, email: isExist.email};
                 return res.status(200).json({ message: "User created successfully" });
         }
     } catch (error) {
@@ -72,7 +80,7 @@ exports.getUsers = async (req, res) => {
         surveyString = "No survey responses";
       }
 
-      return `email: ${user.email}\nfields: ${JSON.stringify(user.fields)}\nsignupwithgoogle: ${user.signupwithgoogle}\n\nuserSurvey:\n${surveyString}\n\n`;
+      return `email: ${decrypt(user.email, user.iv)}\nfields: ${JSON.stringify(user.fields)}\nsignupwithgoogle: ${user.signupwithgoogle}\n\nuserSurvey:\n${surveyString}\n\n`;
     });
 
     return res.status(200).json({message:(dataString.join("\n------------------\n"))});
@@ -81,3 +89,6 @@ exports.getUsers = async (req, res) => {
     return res.status(500).json({ message: "Something went wrong: " + error.message });
   }
 };
+
+
+//        const userId= req.session.user.id;
