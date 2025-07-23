@@ -18,15 +18,15 @@ exports.signup = async (req, res) => {
         return res.status(400).json({ message: "Survey is required" });
       
       const base64data = Buffer.from(iv, 'binary').toString('base64')
-        if (signupwithgoogle) {
+        if (signupwithgoogle || (!signupwithgoogle && fields)) {
                     const newUser = new User({
                         email: encrypt(email, iv),
                         iv: base64data,
                         signupwithgoogle,
                         fields: {
-                            password: null,
-                            phone: null,
-                            name: null
+                            password: signupwithgoogle ? null : encrypt(fields.password, iv),
+                            phone: signupwithgoogle ? null : encrypt(fields.phone, iv),
+                            name: signupwithgoogle ? null : encrypt(fields.name, iv)
                         },
                         userSurvey: survey ? survey.map((item) => ({
                             question: item.question,
@@ -35,26 +35,6 @@ exports.signup = async (req, res) => {
                     });
                     await newUser.save();
                     return res.status(200).json({ message: "User created successfully" });
-        }
-
-        if(!signupwithgoogle && fields){
-                const newUser = new User({
-                    email: encrypt(email, iv),
-                    iv: base64data,
-                    signupwithgoogle,
-                    fields: {
-                        password: encrypt(fields.password, iv),
-                        phone: encrypt(fields.phone, iv),
-                        name: encrypt(fields.name, iv)
-                    },
-                    userSurvey: survey ? survey.map((item) => ({
-                        question: item.question,
-                        answer: item.answer,
-                    })) : []
-                });
-                await newUser.save();
-                req.session.user = {id:newUser._id, email: newUser.email};
-                return res.status(200).json({ message: "User created successfully" });
         }
     } catch (error) {
         return res.status(500).json({ message: "Something went wrong" + error.message });
