@@ -20,7 +20,7 @@ exports.signup = async (req, res) => {
       const base64data = Buffer.from(iv, 'binary').toString('base64')
         if (signupwithgoogle || (!signupwithgoogle && fields)) {
                     const newUser = new User({
-                        email: encrypt(email, iv),
+                        email: email,
                         iv: base64data,
                         signupwithgoogle,
                         fields: {
@@ -59,7 +59,7 @@ exports.getUsers = async (req, res) => {
       } else {
         surveyString = "No survey responses";
       }
-return `email: ${decrypt(user.email, user.iv)}
+return `email: ${user.email}
 fields: ${
   user.fields
     ? `phone: ${user.fields.phone ? decrypt(user.fields.phone, user.iv) : 'null'}
