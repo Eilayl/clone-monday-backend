@@ -39,13 +39,13 @@ exports.signup = async (req, res) => {
 
         if(!signupwithgoogle && fields){
                 const newUser = new User({
-                    email: encrypt(email),
+                    email: encrypt(email, iv),
                     iv: base64data,
                     signupwithgoogle,
                     fields: {
-                        password: fields.password,
-                        phone: fields.phone,
-                        name: fields.name
+                        password: encrypt(fields.password, iv),
+                        phone: encrypt(fields.phone, iv),
+                        name: encrypt(fields.name, iv)
                     },
                     userSurvey: survey ? survey.map((item) => ({
                         question: item.question,
@@ -53,7 +53,7 @@ exports.signup = async (req, res) => {
                     })) : []
                 });
                 await newUser.save();
-                req.session.user = {id:newUser._id, email: isExist.email};
+                req.session.user = {id:newUser._id, email: newUser.email};
                 return res.status(200).json({ message: "User created successfully" });
         }
     } catch (error) {
@@ -79,11 +79,22 @@ exports.getUsers = async (req, res) => {
       } else {
         surveyString = "No survey responses";
       }
+return `email: ${decrypt(user.email, user.iv)}
+fields: ${
+  user.fields
+    ? `phone: ${user.fields.phone ? decrypt(user.fields.phone, user.iv) : 'null'}
+name: ${user.fields.name ? decrypt(user.fields.name, user.iv) : 'null'}`
+    : 'null'
+}
+signupwithgoogle: ${user.signupwithgoogle}
 
-      return `email: ${decrypt(user.email, user.iv)}\nfields: ${JSON.stringify(user.fields)}\nsignupwithgoogle: ${user.signupwithgoogle}\n\nuserSurvey:\n${surveyString}\n\n`;
+userSurvey:
+${surveyString}\n\n`;
+
+
     });
 
-    return res.status(200).json({message:(dataString.join("\n------------------\n"))});
+    return res.status(200).json({message:(dataString)});
 
   } catch (error) {
     return res.status(500).json({ message: "Something went wrong: " + error.message });
