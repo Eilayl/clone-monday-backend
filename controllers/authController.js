@@ -82,4 +82,22 @@ ${surveyString}\n\n`;
 };
 
 
+
+exports.signIn = async (req, res) => {
+  try{
+
+    const {email} = req.body;
+    const isExist = User.findOne({email})
+    if(isExist){
+      
+      req.session.user = {id:isExist._id,  name: isExist.name, email: isExist.email};
+      return res.status(200).send({message: "user Sign In Sucsessfully"})
+    } //just check the email for now
+    else return res.status(404).send({error : "User Not found"})
+    
+  }
+  catch(error){
+    return res.status(500).send({error: "Something went wrong " + error})
+  }
+  }
 //        const userId= req.session.user.id;
