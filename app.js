@@ -3,7 +3,8 @@ const cors = require('cors');
 require('dotenv').config();
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const authRoutes = require('./routes/AuthRoutes');
+const authRoutes = require('./routes/authRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -15,6 +16,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
+
+app.set('trust proxy', 1);
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -32,5 +35,6 @@ app.use(express.json());
 
 // 📦 Routes
 app.use('/auth', authRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 module.exports = app;

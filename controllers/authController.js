@@ -19,23 +19,30 @@ exports.signup = async (req, res) => {
       
       const base64data = Buffer.from(iv, 'binary').toString('base64')
         if (signupwithgoogle || (!signupwithgoogle && fields)) {
-                    const newUser = new User({
-                        email: email,
-                        iv: base64data,
-                        signupwithgoogle,
-                        fields: {
-                            password: signupwithgoogle ? null : encrypt(fields.password, iv),
-                            phone: signupwithgoogle ? null : encrypt(fields.phone, iv),
-                            name: signupwithgoogle ? null : encrypt(fields.name, iv)
-                        },
-                        userSurvey: survey ? survey.map((item) => ({
-                            question: item.question,
-                            answer: item.answer
-                        })) : []
-                    });
-                    await newUser.save();
+          const newUser = new User({
+            email: email,
+            iv: base64data,
+            signupwithgoogle,
+            fields: {
+              password: signupwithgoogle ? null : encrypt(fields.password, iv),
+              phone: signupwithgoogle ? null : encrypt(fields.phone, iv),
+              name: signupwithgoogle ? null : encrypt(fields.name, iv)
+            },
+            userSurvey: survey ? survey.map((item) => ({
+              question: item.question,
+              answer: item.answer
+            })) : []
+          });
+          await newUser.save();
+          req.session.authenticated = true;
+          req.session.user = {
+  id: newUser._id,
+  name: newUser.name,
+  email: newUser.email
+};
                     return res.status(200).json({ message: "User created successfully" });
         }
+        
     } catch (error) {
         return res.status(500).json({ message: "Something went wrong" + error.message });
     }
@@ -84,20 +91,25 @@ ${surveyString}\n\n`;
 
 
 exports.signIn = async (req, res) => {
-  try{
+  try {
+    const { email } = req.body;
 
-    const {email} = req.body;
-    const isExist = User.findOne({email})
-    if(isExist){
-      
-      req.session.user = {id:isExist._id,  name: isExist.name, email: isExist.email};
-      return res.status(200).send({message: "user Sign In Sucsessfully"})
-    } //just check the email for now
-    else return res.status(404).send({error : "User Not found"})
-    
+    const isExist = await User.findOne({ email }).lean();
+
+    if (isExist) {
+      req.session.authenticated = true;
+      req.session.user = {
+        id: isExist._id,
+        name: isExist.name,
+        email: isExist.email
+      };
+
+      return res.status(200).send({message: "User signed in successfully",});
+    } else {
+      return res.status(404).send({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("SignIn Error:", error);
+    return res.status(500).send({ error: "Something went wrong: " + error.message });
   }
-  catch(error){
-    return res.status(500).send({error: "Something went wrong " + error})
-  }
-  }
-//        const userId= req.session.user.id;
+};
