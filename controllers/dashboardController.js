@@ -8,8 +8,9 @@ exports.additem = async (req, res) => {
       return res.status(401).send({ error: "User not authenticated" });
     }
 
+    if(!name)
+      return res.status(404).send({error: "Name is not exists"})
     const userId = req.session.user.id;
-
     let dashboard = await Dashboard.findOne({ userId });
 
     if (!dashboard) {
@@ -18,7 +19,7 @@ exports.additem = async (req, res) => {
         dashboards: [{ name }],
       });
       await dashboard.save();
-      return res.status(201).send({ message: "Dashboard created with new item" });
+      return res.status(200).send({ message: "Dashboard created with new item" });
     }
 
     const alreadyExists = dashboard.dashboards.some(d => d.name === name);
