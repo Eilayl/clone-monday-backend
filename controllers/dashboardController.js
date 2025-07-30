@@ -1,5 +1,5 @@
 const Dashboard = require('../models/Dashboard')
-
+const crypto = require('crypto');
 exports.createDashboard = async (req, res) => {
   try {
     const { name } = req.body;
@@ -31,11 +31,13 @@ exports.createDashboard = async (req, res) => {
         ],
         groups: [
           {
+            id: crypto.randomUUID(),
             name: "To-Do",
             color: "blue",
             items: [{ taskName: "Task1" }],
           },
           {
+            id: crypto.randomUUID(),
             name: "Done",
             color: "green",
             items: [{ taskName: "Task1" }],
@@ -62,11 +64,13 @@ exports.createDashboard = async (req, res) => {
             ],
             groups: [
               {
+                id: crypto.randomUUID(),            
                 name: "To-Do",
                 color: "blue",
                 items: [{ taskName: "Task1" }],
               },
               {
+                id: crypto.randomUUID(),
                 name: "Done",
                 color: "green",
                 items: [{ taskName: "Task1" }],
@@ -145,12 +149,12 @@ exports.updateGroup = async (req, res) => {
       return res.status(404).send({ message: "User dashboards not found" });
     }
 
-    const specificDashboard = dashboards.dashboards.find(d => d.name === dashboard.name);
+    const specificDashboard = dashboards.dashboards.find(d => d.name=== dashboard.name);
     if (!specificDashboard) {
       return res.status(404).send({ error: "User dashboard not found" });
     }
 
-    const groupIndex = specificDashboard.groups.findIndex(g => g.name === group.name);
+    const groupIndex = specificDashboard.groups.findIndex(g => g.id === group.id);
     if (groupIndex === -1) {
       return res.status(404).send({ error: "Group not found in dashboard" });
     }

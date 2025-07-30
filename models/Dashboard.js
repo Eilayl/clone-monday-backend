@@ -20,6 +20,7 @@ const dashboardInnerSchema = new Schema({
   ],
   groups: [
     {
+      id: { type: String, required: true },
       name: { type: String, required: true },
       color: { type: String, required: true },
       items: [
