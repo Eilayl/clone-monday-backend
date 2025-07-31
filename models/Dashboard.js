@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const dashboardInnerSchema = new Schema({
+  dashboardId: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true,

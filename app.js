@@ -5,6 +5,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const txtRoutes = require('./routes/txtRoutes')
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
@@ -31,10 +32,10 @@ app.use(session({
   }
 }));
 
-app.use(express.json());
 
 // 📦 Routes
-app.use('/auth', authRoutes);
-app.use('/dashboard', dashboardRoutes);
+app.use('/auth', express.json(), authRoutes);
+app.use('/dashboard', express.json(), dashboardRoutes);
+app.use('/docx', txtRoutes);
 
 module.exports = app;

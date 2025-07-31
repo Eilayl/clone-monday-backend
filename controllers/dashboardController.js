@@ -20,6 +20,7 @@ exports.createDashboard = async (req, res) => {
       }
       // אם השם לא קיים, מוסיף את ה-dashboard למערך dashboards
       userDashboards.dashboards.push({
+        dashboardId: crypto.randomUUID(),
         name,
         defines: [
           {
@@ -53,6 +54,7 @@ exports.createDashboard = async (req, res) => {
         userId,
         dashboards: [
           {
+            dashboardId: crypto.randomUUID(),
             name,
             defines: [
               {
